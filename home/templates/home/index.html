@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
+  <title>Landing Page</title>
+</head>
+<body>
+
+  <div class="container">
+    <div class="jumbotron text-center mt-5">
+      <h1>Welcome to the Landing Page</h1>
+      <p>Choose where you want to go:</p>
+      <div class="d-flex justify-content-center">
+        <a href="{% url 'dashboard:admin_dashboard_view' %}" class="btn btn-primary btn-lg mr-3">Admin Dashboard</a>
+        <a href="{% url 'dashboard:user_dashboard_view' %}" class="btn btn-secondary btn-lg">Trader Dashboard</a>
+      </div>
+    </div>
+  </div>
+
+</body>
+</html>

@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Forex Trader Dashboard</title>
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+</head>
+<body>
+  <div class="container">
+    <div class="header bg-dark text-white py-4">
+      <h1 class="text-center">{{ request.user.username }} Dashboard</h1>
+      <h4 class="text-center">Balance: $<span id="user_bal">{{ current_bal }}</span></h4>
+    </div>
+  
+    <div id="trade-notification" class="alert alert-success mt-4 text-center" style="display: none;">
+      <h2>New Trade Notification</h2>
+      <p>A trade has been placed.</p>
+    </div>
+  
+    <div class="card mt-4">
+      <div class="card-header">
+        <h2>Recent Trades</h2>
+      </div>
+      <div class="card-body">
+        <table class="table table-bordered" id="trade-table">
+          <thead>
+            <tr>
+              <th>Trade</th>
+              <th>Currency Pair</th>
+              <th>Long/Short</th>
+              <th>Entry Price</th>
+              <th>Exit Price</th>
+              <th>Amount</th>
+              <th>Profit/Loss</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr id="trade-row-1"></tr>
+            <tr id="trade-row-2"></tr>
+            <tr id="trade-row-3"></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  
+    <div class="graph-container mt-4">
+      <h2>Profit/Loss vs. Time</h2>
+      <canvas id="profitLossChart"></canvas>
+    </div>
+  </div>
+  
+  <!-- Optional JavaScript -->
+    <!-- jQuery first, then Popper.js, then Bootstrap JS -->
+    <script src="https://code.jquery.com/jquery-3.1.1.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/popper.js@1.14.7/dist/umd/popper.min.js" integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.3.1/dist/js/bootstrap.min.js" integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            var chartInstance;
+    
+            function sendRequest() {
+                // Use AJAX to send the GET request to the Django URL
+                $.ajax({
+                    url: "{% url 'dashboard:simulate_trade_view' %}",
+                    type: 'GET',
+                    success: function(response) {
+                        // Handle the response as needed
+                        console.log(response);
+    
+                        if (response.status === "success") {
+                            // Show success notification
+                            $('#trade-notification').show();
+    
+                            // Update the table with the recent trades
+                            var trades = response.recent_trades;
+                            for (var i = 0; i < trades.length; i++) {
+                                var trade = trades[i];
+                                var tradeRow = $('#trade-row-' + (i + 1));
+    
+                                // Set the trade data in the row
+                                tradeRow.html('<td>' + trade.id + '</td>' +
+                                    '<td>' + trade.currency_pair + '</td>' +
+                                    '<td>' + trade.trade_type + '</td>' +
+                                    '<td>' + trade.entry_point + '</td>' +
+                                    '<td>' + trade.exit_point + '</td>' +
+                                    '<td>' + trade.trade_amount + '</td>' +
+                                    '<td>' + trade.result + '</td>'
+                                );
+                            }
+    
+                            // Update the user balance
+                            $('#user_bal').text(response.bal.toFixed(2));
+    
+                            // Plot graph
+                            var ctx = document.getElementById('profitLossChart');
+                            var timestamp = response.timestamp;
+                            var priceDifference = response.price_difference;
+    
+                            // Check if a chart instance already exists
+                            if (chartInstance) {
+                                // Destroy the previous chart
+                                chartInstance.destroy();
+                            }
+    
+                            chartInstance = new Chart(ctx, {
+                                type: 'line',
+                                data: {
+                                    labels: timestamp,
+                                    datasets: [{
+                                        label: 'graph of the profit (or loss) vs time',
+                                        data: priceDifference,
+                                        borderWidth: 1
+                                    }]
+                                },
+                                options: {
+                                    scales: {
+                                        y: {
+                                            beginAtZero: true
+                                        }
+                                    }
+                                }
+                            });
+    
+                            // Hide the success notification after 2 seconds
+                            setTimeout(function() {
+                                $('#trade-notification').hide();
+                            }, 2000);
+                        } else {
+                            // Show error message
+                            console.error(response.error_message);
+                        }
+                    },
+                    error: function(xhr, status, error) {
+                        // Handle any errors that occur during the request
+                        console.error(error);
+                    }
+                });
+            }
+    
+            setInterval(sendRequest, 5000);  // 5 seconds in milliseconds
+        });
+    </script>
+        
+</body>
+</html>

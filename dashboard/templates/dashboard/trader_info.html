@@ -1,0 +1,17 @@
+{% for trader in traders %}
+<div class="col-md-4">
+  <div class="card">
+    <div class="card-heading">Trader ID: {{ trader.id }}</div>
+    <div class="card-content">
+        <span class="card-label">Username:</span> {{ trader.username }}<br>
+        <span class="card-label">Total Trades:</span> {{ trader.total_trades }}<br>
+        <span class="card-label">Successful Trades:</span> {{ trader.successful_trades }}<br>
+        <span class="card-label">Losing Trades:</span> {{ trader.losing_trades }}<br>
+        <span class="card-label">Success Rate:</span> {{ trader.success_rate|floatformat:2 }}%<br>
+        <span class="card-label">Loss Rate:</span> {{ trader.loss_rate|floatformat:2 }}%<br>
+        <span class="card-label">Profit:</span> ${{ trader.profit|floatformat:2 }}
+    </div>
+   </div>
+</div>
+{% endfor %}
+
