@@ -5,14 +5,17 @@ from .models import UserTrades
 from django.http import JsonResponse
 from django.contrib.auth.models import User
 from accounts.models import UserBalance
-from django.contrib.auth.mixins import LoginRequiredMixin
+from django.contrib.auth.mixins import LoginRequiredMixin,  UserPassesTestMixin
 from django.forms.models import model_to_dict
 from django.db.models import Q, Count, Sum, Case, When, FloatField
 from django.template.loader import render_to_string
 
 # Create your views here.
 
-class AdminDashboardView(LoginRequiredMixin, View):
+class AdminDashboardView(LoginRequiredMixin,  UserPassesTestMixin, View):
+    def test_func(self):
+        return self.request.user.is_superuser
+    
     def get(self, request, *args, **kwargs):
         return render(request, "dashboard/admin-dashboard.html")
     
